@@ -1,0 +1,22 @@
+# KiberaConnect on Netlify.
+# No Vercel. The Next runtime plugin handles functions, routing and image optimisation.
+
+[build]
+  command = "npx prisma generate && npx prisma db push --skip-generate && npx tsx scripts/seed.ts && next build"
+  publish = ".next"
+
+[build.environment]
+  # Build time: seed the database that ships inside the function bundle.
+  # Prisma resolves relative file: URLs against prisma/schema.prisma,
+  # so ../db/custom.db means <repo>/db/custom.db.
+  DATABASE_URL = "file:../db/custom.db"
+  NETLIFY = "true"
+  NODE_VERSION = "20"
+
+# Runtime: lambdas cannot write to /var/task, so lib/db.ts copies the
+# bundled database to /tmp on cold start and uses this URL.
+[functions.environment]
+  DATABASE_URL = "file:/var/task/db/custom.db"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

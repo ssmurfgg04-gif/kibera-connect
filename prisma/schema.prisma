@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Issue {
+  id           String        @id @default(cuid())
+  title        String
+  description  String
+  category     String // water | sanitation | infrastructure | safety | health | environment | education | energy
+  severity     String        @default("medium") // low | medium | high | critical
+  village      String? // Gatwekera, Soweto West, Kianda, Lindi, etc.
+  latitude     Float?
+  longitude    Float?
+  photoUrl     String?
+  reporterName String?
+  isAnonymous  Boolean       @default(false)
+  status       String        @default("reported") // reported | verified | in_progress | resolved
+  aiSummary    String?
+  aiActions    String? // JSON array of suggested actions
+  aiAffected   Int? // estimated affected population
+  upvotes      Int           @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  updates      IssueUpdate[]
+}
+
+model IssueUpdate {
+  id        String   @id @default(cuid())
+  issueId   String
+  issue     Issue    @relation(fields: [issueId], references: [id], onDelete: Cascade)
+  message   String
+  status    String?
+  author    String   @default("Community Team")
+  createdAt DateTime @default(now())
+}
