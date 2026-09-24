@@ -15,7 +15,7 @@ export function Hero({ onReport, onExplore }: { onReport: () => void; onExplore:
 
   return (
     <section id="top" className="relative overflow-hidden bg-paper">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-24 sm:pt-28 pb-14 lg:pb-20">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-24 sm:pt-28 pb-8 lg:pb-12">
         <div className="hero-grid">
           {/* Copy. Reads like a note somebody left you. */}
           <div>

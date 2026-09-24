@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Menu, X, ArrowUpRight } from "lucide-react";
+import { Menu, X, ArrowRight } from "lucide-react";
 
 const LINKS = [
   { href: "#live", label: "The map" },
@@ -62,7 +62,7 @@ export function SiteNav({ onReport }: { onReport: () => void }) {
             className="hidden md:inline-flex items-center gap-1.5 bg-terra hover:bg-terra-deep active:scale-[0.98] text-primary-foreground text-sm font-semibold h-10 px-4 rounded-[2px] transition-all"
           >
             Report an issue
-            <ArrowUpRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4" />
           </button>
           <button
             className="md:hidden grid place-items-center w-10 h-10 text-inkkc"

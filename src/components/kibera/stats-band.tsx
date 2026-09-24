@@ -51,7 +51,7 @@ export function StatsBand({ refreshKey }: { refreshKey: number }) {
   }, [inView, refreshKey]);
 
   return (
-    <section ref={ref} className="mx-auto max-w-7xl px-4 sm:px-6 py-14 sm:py-20">
+    <section ref={ref} className="mx-auto max-w-7xl px-4 sm:px-6 pt-10 sm:pt-14 pb-14 sm:pb-20">
       {/* Kibera right now: the live counter */}
       <motion.div
         initial={reduce ? false : { opacity: 0, y: 14 }}

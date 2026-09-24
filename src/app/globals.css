@@ -409,3 +409,21 @@
     scroll-behavior: auto;
   }
 }
+
+/* Village name labels on the map. Quiet, uppercase, part of the paper. */
+.kc-village-label {
+  background: transparent !important;
+  border: none !important;
+  pointer-events: none;
+}
+.kc-village-label span {
+  display: block;
+  font-family: "Inter Variable", sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: rgba(38, 70, 83, 0.55);
+  text-align: center;
+  white-space: nowrap;
+  text-shadow: 0 0 4px rgba(233, 229, 218, 0.9), 0 0 4px rgba(233, 229, 218, 0.9);
+}
