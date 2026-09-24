@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpRight, Github } from "lucide-react";
+import { ArrowRight, Github } from "lucide-react";
 
 export function SiteFooter({ onReport }: { onReport: () => void }) {
   return (
@@ -25,7 +25,7 @@ export function SiteFooter({ onReport }: { onReport: () => void }) {
             className="inline-flex items-center gap-2 bg-terra hover:bg-[#d05040] active:scale-[0.98] text-white font-semibold min-h-[52px] px-6 rounded-[2px] transition-all"
           >
             Report an issue
-            <ArrowUpRight className="w-[18px] h-[18px]" />
+            <ArrowRight className="w-[18px] h-[18px]" />
           </button>
           <a
             href="#live"

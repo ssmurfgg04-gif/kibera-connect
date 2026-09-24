@@ -37,6 +37,7 @@ type SeedIssue = {
   aiSummary: string;
   aiActions: string[];
   aiAffected: number;
+  photoUrl?: string;
   updateMessage?: string;
 };
 
@@ -52,6 +53,7 @@ const ISSUES: SeedIssue[] = [
     upvotes: 148,
     reporter: "Amani O.",
     daysAgo: 3,
+    photoUrl: "/images/pipe-before.jpg",
     aiSummary:
       "Critical water access failure affecting an estimated 300+ households. The 4-hour queue combined with price gouging (3x markup) indicates severe supply disruption. School absenteeism risk is high; immediate repair and interim distribution point recommended.",
     aiActions: [
@@ -97,6 +99,7 @@ const ISSUES: SeedIssue[] = [
     upvotes: 96,
     reporter: "Anonymous",
     daysAgo: 1,
+    photoUrl: "/images/alley.jpg",
     aiSummary:
       "Infrastructure-driven safety risk with reported harassment. Night-time economic activity and safe mobility for women are directly impacted. Quick-win fix: solar streetlights bypass the grid connection issue entirely.",
     aiActions: [
@@ -162,6 +165,7 @@ const ISSUES: SeedIssue[] = [
     upvotes: 88,
     reporter: "Teacher Daniel K.",
     daysAgo: 4,
+    photoUrl: "/images/kids-wall.jpg",
     aiSummary:
       "School infrastructure damage directly interrupting learning for 62 pupils ahead of national exams. Temporary tarpaulin is not exam-grade resilience. Fastest path: sheet-metal repair kit plus local fundi labour within one week.",
     aiActions: [
@@ -375,6 +379,7 @@ const ISSUES: SeedIssue[] = [
     upvotes: 64,
     reporter: "CHW Deborah",
     daysAgo: 4,
+    photoUrl: "/images/volunteers.jpg",
     aiSummary:
       "Vaccination coverage gap concentrated in hard-to-reach children. Outbreak risk scales with every uncovered pocket in dense settlement. Mobile outreach + evening/weekend sessions close the gap fast.",
     aiActions: [
@@ -451,6 +456,7 @@ async function main() {
         reporterName: issue.reporter,
         isAnonymous: issue.reporter === "Anonymous",
         status: issue.status,
+        photoUrl: issue.photoUrl ?? null,
         aiSummary: issue.aiSummary,
         aiActions: JSON.stringify(issue.aiActions),
         aiAffected: issue.aiAffected,
@@ -507,6 +513,7 @@ async function main() {
         longitude: loc.lng,
         reporterName: "Community Response Team",
         status: "resolved",
+        photoUrl: i === 0 ? "/images/pipe-after.jpg" : null,
         aiSummary:
           "Resolution confirmed through community verification. Impact metrics captured for transparency reporting.",
         aiActions: JSON.stringify(["Verify impact with beneficiary interviews", "Publish resolution report to platform"]),

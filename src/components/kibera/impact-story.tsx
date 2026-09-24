@@ -90,7 +90,7 @@ export function ImpactStory({ resolved }: { resolved: Issue[] }) {
                 {[
                   ["Problem", "Broken water point"],
                   ["Location", "Gatwekera"],
-                  ["People who reported", "19 residents"],
+                  ["People who reported", "20 residents"],
                   ["Time waiting before", "11 days"],
                   ["Time to repair", "2 days"],
                   ["Result", "Water restored"],

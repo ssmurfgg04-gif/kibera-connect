@@ -269,7 +269,7 @@ export function ReportFlow({ onSubmitted }: { onSubmitted: () => void }) {
   return (
     <div className="grid lg:grid-cols-[1.1fr_0.9fr] min-h-[640px]">
       {/* ── Form side ── */}
-      <div className="p-6 sm:p-8 border-b lg:border-b-0 lg:border-r border-border">
+      <div className="p-6 sm:p-8 border-b lg:border-b-0 lg:border-r border-border min-w-0">
         <AnimatePresence mode="wait">
           {phase === "done" || phase === "joined" ? (
             <motion.div
@@ -365,24 +365,32 @@ export function ReportFlow({ onSubmitted }: { onSubmitted: () => void }) {
                   </div>
                   <p className="mt-1 text-[13px] leading-snug text-muted-foreground">
                     {similar.length === 1
-                      ? "One neighbour already reported this."
-                      : `${similar.length} neighbours already reported this.`}{" "}
-                    {similar[0].upvotes > 1 && `That is ${similar[0].upvotes} voices on one paper instead of ${similar[0].upvotes} papers in a drawer.`}
+                      ? similar[0].upvotes > 5
+                        ? `One report already carries ${similar[0].upvotes} voices. Yours makes it ${similar[0].upvotes + 1}.`
+                        : "One neighbour already reported this."
+                      : `${similar.length} reports from this spot already. All pointing at the same problem.`}
+                    {similar.length > 1 &&
+                      similar[0].upvotes > 1 &&
+                      ` That is ${similar[0].upvotes} voices on one paper instead of ${similar[0].upvotes} papers in a drawer.`}
                   </p>
                   <ul className="mt-2 space-y-1">
                     {similar.slice(0, 3).map((m) => (
-                      <li key={m.id} className="flex items-center gap-2 text-[12.5px] text-muted-foreground">
-                        <span className="cat-dot bg-primary/60 shrink-0" />
-                        <span className="font-medium text-foreground truncate max-w-[46%]">{m.title}</span>
-                        <span>{m.village ?? "Kibera"}</span>
-                        <span className="text-border">·</span>
-                        <span className="tabular-nums">{fmtDistance(m.distanceM)}</span>
-                        <span className="text-border">·</span>
-                        <span>{timeAgo(m.createdAt)}</span>
-                        <span className="ml-auto inline-flex items-center gap-1 font-semibold text-foreground tabular-nums">
-                          <MessageSquareHeart className="w-3 h-3 text-primary" />
-                          {m.upvotes}
-                        </span>
+                      <li key={m.id} className="text-[12.5px] text-muted-foreground min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="cat-dot bg-primary/60 shrink-0" />
+                          <span className="font-medium text-foreground truncate">{m.title}</span>
+                          <span className="ml-auto inline-flex items-center gap-1 font-semibold text-foreground tabular-nums shrink-0">
+                            <MessageSquareHeart className="w-3 h-3 text-primary" />
+                            {m.upvotes}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 pl-4 mt-0.5 flex-wrap">
+                          <span>{m.village ?? "Kibera"}</span>
+                          <span className="text-border">·</span>
+                          <span className="tabular-nums">{fmtDistance(m.distanceM)}</span>
+                          <span className="text-border">·</span>
+                          <span>{timeAgo(m.createdAt)}</span>
+                        </div>
                       </li>
                     ))}
                   </ul>

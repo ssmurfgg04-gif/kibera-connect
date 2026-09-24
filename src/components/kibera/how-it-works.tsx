@@ -113,7 +113,7 @@ export function HowItWorks() {
                         style={{ transform: `rotate(${i * 17}deg) translateY(${(i % 3) - 1}px)` }}
                       />
                     ))}
-                    <span className="font-hand text-[1.3rem] text-terra ml-2">+47 more</span>
+                    <span className="font-hand text-[1.3rem] text-terra ml-2">+8 more</span>
                   </div>
                   <p className="mt-3 text-[15px] leading-relaxed text-charcoal">
                     Every dot is one person who took 30 seconds. Together they

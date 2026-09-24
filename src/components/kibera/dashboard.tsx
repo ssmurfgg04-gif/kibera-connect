@@ -29,11 +29,22 @@ import {
 const ease = [0.22, 1, 0.36, 1] as const;
 
 export function Dashboard({ issues, loading }: { issues: Issue[]; loading: boolean }) {
+  // Full names on the axis, angled so nothing gets chopped to "Sanit".
+  const SHORT_LABELS: Record<string, string> = {
+    water: "Water",
+    sanitation: "Sanitation",
+    infrastructure: "Infra",
+    safety: "Safety",
+    health: "Health",
+    environment: "Environ",
+    education: "Education",
+    energy: "Energy",
+  };
   const byCategory = useMemo(
     () =>
       CATEGORIES.map((c) => ({
         name: CATEGORY_META[c].label,
-        short: CATEGORY_META[c].label.slice(0, 5),
+        short: SHORT_LABELS[c] ?? CATEGORY_META[c].label,
         value: issues.filter((i) => i.category === c).length,
         color: CATEGORY_META[c].color,
       })).filter((d) => d.value > 0),
@@ -138,7 +149,7 @@ export function Dashboard({ issues, loading }: { issues: Issue[]; loading: boole
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={byCategory} margin={{ top: 4, right: 8, left: -22, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e6dcc9" vertical={false} />
-                <XAxis dataKey="short" tick={{ fontSize: 11, fill: "#5b6b78" }} axisLine={false} tickLine={false} interval={0} />
+                <XAxis dataKey="short" tick={{ fontSize: 11, fill: "#5b6b78" }} axisLine={false} tickLine={false} interval={0} angle={-28} textAnchor="end" height={52} />
                 <YAxis tick={{ fontSize: 11, fill: "#5b6b78" }} axisLine={false} tickLine={false} allowDecimals={false} />
                 <Tooltip cursor={{ fill: "rgba(228,87,13,0.06)" }} />
                 <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={34}>
