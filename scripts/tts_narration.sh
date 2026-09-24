@@ -1,34 +1,46 @@
 #!/bin/bash
-# KiberaConnect demo video narration — TTS segments
+# KiberaConnect demo video narration. Kenyan voice, no em dashes.
+# Resume support: a segment is regenerated only when its text changed.
 set -e
 OUT=/home/z/my-project/assets/audio
 mkdir -p "$OUT"
 
-SEG1="Meet KiberaConnect — the platform that turns a thirty second report from any phone into real, trackable action for Kibera, Nairobi. Africa's largest informal settlement is home to a quarter of a million people, and every one of them sees problems long before the system does."
+SEG1="The water pipe in Gatwekera broke three weeks ago. Nobody came. KiberaConnect is how twenty neighbours changed that, with one photo each."
 
-SEG2="This is the live community map. Over twenty reports across eleven villages, each one triaged by severity. Tap any marker, and the full story opens: what's happening, who's affected, and the AI assessment with concrete next steps."
+SEG2="This is the live map of Kibera, right now. Every dot is a neighbour. Grey means waiting. Orange means someone is on it. And every green dot is proof."
 
-SEG3="Reporting takes thirty seconds. Pick a category, name your village, describe it like you'd tell a neighbour — and post anonymously if you choose."
+SEG3="Reporting takes thirty seconds. One photo, a few words. English, Kiswahili or Sheng, all fine. No account, no forms. GPS tags itself."
 
-SEG4="Then something remarkable happens. The AI reads the report with Kibera specific context — density, drainage, fire risk, and health networks."
+SEG4="Then the analyst reads it the way Kibera would. The density, the drainage, who is downstream, and who can actually fix it."
 
-SEG5="Within seconds: severity scored as high, eight hundred residents estimated affected, and four concrete actions naming real local actors — from Nairobi Water, to village elders, to community health volunteers. With a clear urgency note attached."
+SEG5="In seconds: severity scored high, fifteen hundred residents affected, and next steps that name real people. The village elders. Nairobi Water. Community health volunteers."
 
-SEG6="One tap posts it to the community map. Neighbours upvote, elders verify, and every status change stays public until the issue is resolved. No black holes."
+SEG6="You were never the only one. Twelve neighbours already reported the same pipe. Fifty reports is not noise anymore. It is a work order."
 
-SEG7="The insights dashboard shows the community exactly where the friction is — by category, by village, over time. And the response pipeline proves that reports actually move."
+SEG7="And the numbers stay honest, by village, by week. Reported Tuesday. Fixed Thursday. That receipt goes straight to the WhatsApp group."
 
-SEG8="KiberaConnect. Every voice in Kibera — heard, and answered. Pamoja tunasonga. Together, we move."
+SEG8="KiberaConnect. See a problem. Get people behind it. See what happens. Don't just report it. Follow it."
 
 declare -a SEGS=("$SEG1" "$SEG2" "$SEG3" "$SEG4" "$SEG5" "$SEG6" "$SEG7" "$SEG8")
 
 for i in "${!SEGS[@]}"; do
   n=$((i+1))
+  text="${SEGS[$i]}"
+  hash=$(printf '%s' "$text" | md5sum | cut -d' ' -f1)
+  meta="$OUT/seg$n.meta"
+
+  # resume: skip when audio exists AND narration text is unchanged
+  if [ -f "$OUT/seg$n.wav" ] && [ -f "$meta" ] && [ "$(cat "$meta")" = "$hash" ]; then
+    echo "== seg$n unchanged, keeping existing audio"
+    continue
+  fi
+
   echo ">>> Segment $n"
-  z-ai tts -i "${SEGS[$i]}" -o "$OUT/seg$n.wav" --voice jam --speed 1.0 --format wav
+  z-ai tts -i "$text" -o "$OUT/seg$n.wav" --voice jam --speed 1.0 --format wav
+  printf '%s' "$hash" > "$meta"
 done
 
-echo "All segments generated:"
+echo "All segments ready:"
 for f in "$OUT"/seg*.wav; do
   d=$(ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$f")
   echo "$f  ${d}s"
