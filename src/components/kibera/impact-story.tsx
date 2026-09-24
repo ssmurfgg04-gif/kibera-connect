@@ -8,7 +8,7 @@ const ease = [0.16, 1, 0.3, 1] as const;
 
 const IMPACT = [
   { strong: "3 hours", rest: " back to Amani's morning" },
-  { strong: "19 reports", rest: " became 1 work order" },
+  { strong: "20 reports", rest: " became 1 work order" },
   { strong: "2 days", rest: " from report to repair. The old average was 47." },
   { strong: "0 phone calls", rest: " to numbers that never answer" },
 ];
@@ -138,28 +138,28 @@ export function ImpactStory({ resolved }: { resolved: Issue[] }) {
         >
           <div className="grid sm:grid-cols-3 gap-8">
             <div>
-              <div className="font-display text-3xl sm:text-4xl font-bold text-sunrise tabular-nums">
+              <div className="font-display text-3xl sm:text-4xl font-bold text-clay tabular-nums">
                 31.6%
               </div>
-              <p className="mt-2 text-sm leading-relaxed text-white/75 max-w-[38ch]">
+              <p className="mt-2 text-sm leading-relaxed text-white/80 max-w-[38ch]">
                 of Kibera households get water piped to their plot. The rest buy
                 it by the jerrycan, at whatever the vendor charges that day.
               </p>
             </div>
             <div>
-              <div className="font-display text-3xl sm:text-4xl font-bold text-sunrise tabular-nums">
+              <div className="font-display text-3xl sm:text-4xl font-bold text-clay tabular-nums">
                 KSh 5
               </div>
-              <p className="mt-2 text-sm leading-relaxed text-white/75 max-w-[38ch]">
+              <p className="mt-2 text-sm leading-relaxed text-white/80 max-w-[38ch]">
                 per visit to a shared toilet, for 96% of residents who do not
                 have one at home. Small money that adds up to a hard life.
               </p>
             </div>
             <div>
-              <div className="font-display text-3xl sm:text-4xl font-bold text-sunrise tabular-nums">
+              <div className="font-display text-3xl sm:text-4xl font-bold text-clay tabular-nums">
                 ~250,000
               </div>
-              <p className="mt-2 text-sm leading-relaxed text-white/75 max-w-[38ch]">
+              <p className="mt-2 text-sm leading-relaxed text-white/80 max-w-[38ch]">
                 neighbours across 13 villages. The community is the hero here.
                 KiberaConnect just keeps the receipts.
               </p>

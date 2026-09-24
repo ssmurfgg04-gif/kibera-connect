@@ -774,7 +774,7 @@ export function ReportFlow({ onSubmitted }: { onSubmitted: () => void }) {
               >
                 <div className="text-center max-w-[300px]">
                   <div className="mx-auto w-16 h-16 rounded-[2px] bg-card ring-1 ring-border grid place-items-center rotate-3">
-                    <Sparkles className="w-7 h-7 text-sunrise" />
+                    <Sparkles className="w-7 h-7 text-terra" />
                   </div>
                   <h3 className="font-display mt-5 text-xl font-semibold">
                     Your report meets Kibera&apos;s context.
@@ -791,7 +791,7 @@ export function ReportFlow({ onSubmitted }: { onSubmitted: () => void }) {
                       <span className="cat-dot bg-sunrise" /> Affected-population estimate
                     </span>
                     <span className="inline-flex items-center gap-2">
-                      <span className="cat-dot bg-primary" /> 3–5 concrete next actions
+                      <span className="cat-dot bg-primary" /> 3-5 concrete next actions
                     </span>
                   </div>
                 </div>

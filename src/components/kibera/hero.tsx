@@ -60,9 +60,10 @@ export function Hero({ onReport, onExplore }: { onReport: () => void; onExplore:
             </motion.div>
           </div>
 
-          {/* Photo. Documentary, not decoration. */}
+          {/* Photo. Documentary, not decoration. The blur placeholder keeps
+              a slow first paint looking intentional, never like a broken block. */}
           <motion.figure {...fade(0.18)} className="lg:mt-6">
-            <div className="photo-authentic relative aspect-[4/3] overflow-hidden border border-border bg-secondary">
+            <div className="photo-authentic relative aspect-[4/3] overflow-hidden border border-border bg-[#d8d2c4]">
               <Image
                 src="/images/alley.jpg"
                 alt="A narrow alley in Kibera after the morning rains, Nairobi"
@@ -70,6 +71,8 @@ export function Hero({ onReport, onExplore }: { onReport: () => void; onExplore:
                 priority
                 sizes="(max-width: 1024px) 92vw, 38vw"
                 className="object-cover"
+                placeholder="blur"
+                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABALDA4MChAODQ4SERMSGBcVFRcYGRoaGhsaGxsdHR0dHR0dHR3/2wBDAQ4SEhcVFRoZGRoqHx8eKi4qKi4qNDQ0NDQ0NDQ0NDQ0NDQ0NDQ/wAARCAAKAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAf/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k="
               />
             </div>
             <figcaption className="mt-3">

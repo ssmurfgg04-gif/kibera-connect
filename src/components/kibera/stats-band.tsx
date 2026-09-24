@@ -15,11 +15,11 @@ const STORIES = [
     border: "border-l-terra",
   },
   {
-    number: "19",
+    number: "20",
     unit: "neighbours",
     story:
-      "Reported the burst sewage line on Lindi Road in a single week. Before this, that was 19 phone calls to a number nobody picked.",
-    hand: "19 reports, 1 work order",
+      "Reported the burst sewage line on Lindi Road in a single week. Before this, that was 20 phone calls to a number nobody picked.",
+    hand: "20 reports, 1 work order",
     border: "border-l-sky",
   },
   {
@@ -36,18 +36,32 @@ export function StatsBand({ refreshKey }: { refreshKey: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
   const reduce = useReducedMotion();
-  const [live, setLive] = useState({ total: 0, resolved: 0, open: 0 });
+  const [live, setLive] = useState<{ total: number | null; resolved: number | null; open: number | null }>({
+    total: null,
+    resolved: null,
+    open: null,
+  });
 
   useEffect(() => {
     if (!inView) return;
+    let alive = true;
     fetch("/api/stats")
-      .then((r) => r.json())
+      .then((r) => {
+        if (!r.ok) throw new Error("stats failed");
+        return r.json();
+      })
       .then((d) => {
+        if (!alive) return;
         const total = d.total ?? 0;
         const resolved = d.resolved ?? 0;
         setLive({ total, resolved, open: Math.max(total - resolved, 0) });
       })
-      .catch(() => {});
+      .catch(() => {
+        // keep the dashes. a wrong zero is a lie; a dash is honest.
+      });
+    return () => {
+      alive = false;
+    };
   }, [inView, refreshKey]);
 
   return (
@@ -66,19 +80,19 @@ export function StatsBand({ refreshKey }: { refreshKey: number }) {
         <div className="flex flex-wrap items-end gap-x-8 gap-y-3 pb-1">
           <div>
             <div className="font-display text-3xl sm:text-4xl font-bold text-inkkc tabular-nums leading-none">
-              {live.total}
+              {live.total ?? "-"}
             </div>
             <div className="text-xs font-medium text-muted-foreground mt-1">issues reported</div>
           </div>
           <div>
             <div className="font-display text-3xl sm:text-4xl font-bold text-terra tabular-nums leading-none">
-              {live.open}
+              {live.open ?? "-"}
             </div>
             <div className="text-xs font-medium text-muted-foreground mt-1">being pushed</div>
           </div>
           <div>
             <div className="font-display text-3xl sm:text-4xl font-bold text-sky-deep tabular-nums leading-none">
-              {live.resolved}
+              {live.resolved ?? "-"}
             </div>
             <div className="text-xs font-medium text-muted-foreground mt-1">confirmed fixed</div>
           </div>
