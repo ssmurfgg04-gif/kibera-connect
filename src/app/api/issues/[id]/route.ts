@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db, dbReady } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 // GET /api/issues/[id] — single issue with full update history
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    await dbReady;
     const { id } = await params;
     const issue = await db.issue.findUnique({
       where: { id },
@@ -22,6 +23,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 // PATCH /api/issues/[id] — update status / add official update note
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    await dbReady;
     const { id } = await params;
     const { status, message, author } = await req.json();
 

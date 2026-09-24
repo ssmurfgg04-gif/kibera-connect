@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db, dbReady } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 // GET /api/stats — aggregate dashboard statistics
 export async function GET() {
   try {
+    await dbReady;
     const [total, resolved, inProgress, verified, critical, byCategoryRaw, upvotesAgg, last7d] = await Promise.all([
       db.issue.count(),
       db.issue.count({ where: { status: "resolved" } }),

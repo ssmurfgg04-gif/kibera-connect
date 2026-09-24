@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db, dbReady } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 // GET /api/issues — list issues with optional filters
 export async function GET(req: NextRequest) {
   try {
+    await dbReady;
     const { searchParams } = new URL(req.url);
     const category = searchParams.get("category");
     const status = searchParams.get("status");
@@ -44,6 +45,7 @@ export async function GET(req: NextRequest) {
 // POST /api/issues — create a new issue (with optional AI analysis payload)
 export async function POST(req: NextRequest) {
   try {
+    await dbReady;
     const body = await req.json();
     const { title, description, category, severity, village, latitude, longitude, reporterName, isAnonymous, photoUrl, aiAnalysis } = body;
 

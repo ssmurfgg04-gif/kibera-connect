@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db, dbReady } from "@/lib/db";
 import { compareReports, inferCategory } from "@/lib/triage";
 
 export const dynamic = "force-dynamic";
@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 // No AI, no network calls beyond the local database, instant on any phone.
 export async function GET(req: NextRequest) {
   try {
+    await dbReady;
     const { searchParams } = new URL(req.url);
     const lat = parseFloat(searchParams.get("lat") ?? "");
     const lng = parseFloat(searchParams.get("lng") ?? "");
