@@ -398,10 +398,9 @@ export function ReportFlow({ onSubmitted }: { onSubmitted: () => void }) {
                     <Button
                       type="button"
                       onClick={joinExisting}
-                      disabled={phase === "joining"}
                       className="rounded-[2px] bg-primary hover:bg-terra-deep text-primary-foreground h-10 px-4 text-[13px] font-semibold gap-2"
                     >
-                      {phase === "joining" ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageSquareHeart className="w-4 h-4" />}
+                      <MessageSquareHeart className="w-4 h-4" />
                       Add my voice to theirs
                     </Button>
                     <button
@@ -565,7 +564,7 @@ export function ReportFlow({ onSubmitted }: { onSubmitted: () => void }) {
               )}
 
               <div className="flex flex-wrap items-center gap-3 pt-1">
-                {phase === "analyzed" ? (
+                {phase === "analyzed" || phase === "submitting" ? (
                   <>
                     <Button
                       onClick={submit}
@@ -765,8 +764,7 @@ export function ReportFlow({ onSubmitted }: { onSubmitted: () => void }) {
             </motion.div>
           )}
 
-          {(phase === "form" || phase === "analyzing" || phase === "submitting" || phase === "done") &&
-            phase !== "analyzed" && phase !== "analyzing" && (
+          {(phase === "form" || phase === "submitting" || phase === "done" || phase === "joining" || phase === "joined") && (
               <motion.div
                 key="placeholder"
                 initial={{ opacity: 0 }}

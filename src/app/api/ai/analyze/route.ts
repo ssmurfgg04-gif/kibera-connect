@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { inferCategory, inferSeverity, localSummary, CATEGORY_PLAYBOOK, type TriageCategory } from "@/lib/triage";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -78,18 +79,25 @@ ${category ? `Reporter-selected category: ${category}` : ""}`,
     }
 
     if (!analysis || !analysis.severity || !Array.isArray(analysis.actions)) {
-      // Graceful fallback so reporting never blocks
+      // Graceful fallback so reporting never blocks. The rulebook here is the
+      // same one the dedup uses: keyword categories tuned to English,
+      // Kiswahili and Sheng, plus a playbook of actions that name real desks
+      // in Kibera. Not a stub. A working triage engine that runs anywhere.
+      const text = `${title} ${description}`;
+      const cat: TriageCategory = inferCategory(text, category && CATEGORIES.includes(category) ? category : "infrastructure");
+      const play = CATEGORY_PLAYBOOK[cat];
       analysis = {
-        severity: "medium",
-        category: category && CATEGORIES.includes(category) ? category : "infrastructure",
-        summary: "Report received and queued for community review. Automated analysis is currently unavailable, so this issue was triaged at medium priority by default.",
-        actions: [
-          "Notify the village elder council for initial verification",
-          "Share the report with community health volunteers covering the area",
-          "Follow up with the relevant county office within 48 hours",
-        ],
-        affectedEstimate: 100,
-        urgencyNote: "Verify on the ground within 48 hours.",
+        severity: inferSeverity({ description: text, category: cat }),
+        category: cat,
+        summary: localSummary(cat, village ?? null, 1),
+        actions: play.actions.slice(0, 4),
+        affectedEstimate: play.affected,
+        urgencyNote:
+          cat === "sanitation"
+            ? "Spills move fast between households. Verify within 24 hours."
+            : cat === "water"
+              ? "Water outages compound daily. Confirm within 48 hours."
+              : "Verify on the ground within 48 hours.",
       };
     }
 
