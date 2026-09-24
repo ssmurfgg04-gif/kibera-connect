@@ -202,6 +202,20 @@ export function MapView({
                   </span>
                 </div>
                 <h4 className="mt-1.5 text-[14.5px] font-semibold leading-snug">{issue.title}</h4>
+                {issue.photoUrl && (
+                  <div className="mt-2 relative overflow-hidden rounded-[2px]">
+                    <img
+                      src={issue.photoUrl}
+                      alt="Photo attached to this report"
+                      loading="lazy"
+                      className="w-full h-24 object-cover"
+                      style={{ filter: "contrast(1.08) saturate(0.92)" }}
+                    />
+                    <span className="absolute bottom-1 right-1 bg-inkkc/80 text-primary-foreground text-[9.5px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-[2px]">
+                      photo evidence
+                    </span>
+                  </div>
+                )}
                 <div className="mt-1.5 flex items-center gap-2 text-[12px] text-muted-foreground">
                   <MapPin className="w-3.5 h-3.5" />
                   {issue.village ?? "Kibera"}
@@ -296,6 +310,19 @@ export function MapView({
               </div>
 
               <div className="nice-scroll overflow-y-auto p-4 pt-3 space-y-3">
+                {selected.photoUrl && (
+                  <div className="relative overflow-hidden rounded-[2px] ring-1 ring-border">
+                    <img
+                      src={selected.photoUrl}
+                      alt="Photo evidence attached to this report"
+                      className="w-full h-44 object-cover"
+                      style={{ filter: "contrast(1.08) saturate(0.92)" }}
+                    />
+                    <span className="absolute top-2 left-2 bg-inkkc/85 text-primary-foreground text-[10px] font-bold uppercase tracking-[0.14em] px-2 py-1 rounded-[2px]">
+                      First photo · evidence
+                    </span>
+                  </div>
+                )}
                 <p className="text-[13.5px] leading-relaxed text-muted-foreground line-clamp-4">
                   {selected.description}
                 </p>
