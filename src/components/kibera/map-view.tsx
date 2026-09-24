@@ -12,6 +12,7 @@ import {
   Clock,
   ArrowRight,
   Loader2,
+  WifiOff,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -48,10 +49,14 @@ const MapInner = dynamic(() => import("./map-inner"), {
 export function MapView({
   issues,
   loading,
+  error,
+  onRetry,
   onReport,
 }: {
   issues: Issue[];
   loading: boolean;
+  error: boolean;
+  onRetry: () => void;
   onReport: () => void;
 }) {
   const [category, setCategory] = useState("all");
@@ -167,9 +172,57 @@ export function MapView({
             Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="rounded-[2px] bg-secondary/60 h-24 animate-pulse" />
             ))}
-          {!loading && filtered.length === 0 && (
-            <div className="text-center py-14 text-sm text-muted-foreground">
-              No issues match these filters.
+          {!loading && error && issues.length === 0 && (
+            <div className="py-10 px-4 text-center">
+              <div className="mx-auto w-10 h-10 rounded-[2px] bg-secondary ring-1 ring-border grid place-items-center" aria-hidden="true">
+                <WifiOff className="w-4.5 h-4.5 text-muted-foreground" />
+              </div>
+              <p className="mt-3 text-[14px] font-semibold text-inkkc">The feed did not load.</p>
+              <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
+                Probably the connection, not you. The reports are still there.
+              </p>
+              <button
+                onClick={onRetry}
+                className="mt-3 inline-flex items-center gap-2 h-10 px-4 rounded-[2px] bg-inkkc text-primary-foreground text-[13px] font-semibold hover:bg-charcoal active:scale-[0.98] transition-all"
+              >
+                <Loader2 className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+                Try again
+              </button>
+            </div>
+          )}
+          {!loading && !error && issues.length === 0 && (
+            <div className="py-10 px-4 text-center">
+              <p className="text-[14px] font-semibold text-inkkc">No reports yet. The first one starts the count.</p>
+              <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
+                See a broken pipe, a dark street, an overflowing toilet? That is what this map is for.
+              </p>
+              <button
+                onClick={onReport}
+                className="mt-3 inline-flex items-center gap-2 h-10 px-4 rounded-[2px] bg-terra text-primary-foreground text-[13px] font-semibold hover:bg-terra-deep active:scale-[0.98] transition-all"
+              >
+                Be the first to report
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+          {!loading && !error && issues.length > 0 && filtered.length === 0 && (
+            <div className="py-10 px-4 text-center">
+              <p className="text-[14px] font-semibold text-inkkc">Nothing matches those filters.</p>
+              <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
+                {issues.length} reports are on the map. Loosen the search or clear the filters to see them.
+              </p>
+              <button
+                onClick={() => {
+                  setCategory("all");
+                  setStatus("all");
+                  setVillage("all");
+                  setQuery("");
+                }}
+                className="mt-3 inline-flex items-center gap-2 h-10 px-4 rounded-[2px] bg-secondary text-inkkc text-[13px] font-semibold hover:bg-accent active:scale-[0.98] transition-all"
+              >
+                <X className="w-4 h-4" />
+                Clear filters
+              </button>
             </div>
           )}
           {filtered.map((issue) => {

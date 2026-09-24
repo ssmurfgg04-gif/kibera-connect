@@ -28,15 +28,19 @@ export function AppShowcase({
 }) {
   const [issues, setIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const reduce = useReducedMotion();
 
   const loadIssues = useCallback(async () => {
     try {
       const res = await fetch("/api/issues", { cache: "no-store" });
       const data = await res.json();
+      if (!res.ok) throw new Error(data?.error ?? "feed failed");
       setIssues(data.issues ?? []);
+      setError(false);
     } catch {
-      // keep stale data on failure
+      // keep stale data on failure, but say it out loud
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -102,7 +106,15 @@ export function AppShowcase({
         id="report-panel"
       >
         <div className="bg-card border border-border overflow-hidden rounded-[2px]">
-          {tab === "map" && <MapView issues={issues} loading={loading} onReport={() => onTabChange("report")} />}
+          {tab === "map" && (
+            <MapView
+              issues={issues}
+              loading={loading}
+              error={error}
+              onRetry={loadIssues}
+              onReport={() => onTabChange("report")}
+            />
+          )}
           {tab === "report" && (
             <ReportFlow
               onSubmitted={() => {
