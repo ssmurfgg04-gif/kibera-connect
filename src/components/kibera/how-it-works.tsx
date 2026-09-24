@@ -90,13 +90,13 @@ export function HowItWorks() {
                 <h3 className="font-display text-2xl font-bold text-inkkc">We make noise.</h3>
                 <p className="mt-3 text-[15.5px] leading-relaxed text-charcoal max-w-[58ch]">
                   Your report joins every other report from your street, your
-                  village, your section. When 50 people report the same broken
-                  pipe, that is not 50 complaints anymore. That is one problem
+                  village, your section. When 20 neighbours report the same broken
+                  pipe, that is not 20 complaints anymore. That is one problem
                   the county cannot pretend not to see.
                 </p>
                 <p className="text-[15.5px] leading-relaxed text-charcoal mt-3">
                   The moment you submit, you find out you were never the only
-                  one. Twelve of your neighbours already said the same thing.
+                  one. Nineteen of your neighbours already said the same thing.
                 </p>
               </div>
               <div className="lg:justify-self-end w-full max-w-[320px]">
