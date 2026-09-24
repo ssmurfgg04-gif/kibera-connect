@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Droplets,
@@ -24,6 +24,8 @@ import {
   Users,
   Clock3,
   Loader2,
+  MessageSquareHeart,
+  Volume2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,7 +39,27 @@ import {
   VILLAGES,
   SEVERITY_META,
   AiAnalysis,
+  timeAgo,
 } from "@/lib/kibera";
+import { VoiceReport } from "./voice-report";
+
+interface SimilarMatch {
+  id: string;
+  title: string;
+  village: string | null;
+  status: string;
+  upvotes: number;
+  createdAt: string;
+  distanceM: number | null;
+  similarity: number;
+}
+
+function fmtDistance(m: number | null): string {
+  if (m == null) return "same words";
+  if (m < 15) return "right here";
+  if (m <= 60) return `${m} steps away`;
+  return null as unknown as string;
+}
 
 const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   water: <Droplets className="w-5 h-5" />,
@@ -50,7 +72,7 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   energy: <Zap className="w-5 h-5" />,
 };
 
-type Phase = "form" | "analyzing" | "analyzed" | "submitting" | "done";
+type Phase = "form" | "analyzing" | "analyzed" | "submitting" | "done" | "joining" | "joined";
 
 export function ReportFlow({ onSubmitted }: { onSubmitted: () => void }) {
   const [title, setTitle] = useState("");
@@ -65,8 +87,65 @@ export function ReportFlow({ onSubmitted }: { onSubmitted: () => void }) {
   const [phase, setPhase] = useState<Phase>("form");
   const [analysis, setAnalysis] = useState<AiAnalysis | null>(null);
   const [error, setError] = useState("");
+  const [similar, setSimilar] = useState<SimilarMatch[]>([]);
+  const [checking, setChecking] = useState(false);
+  const [dismissedSimilar, setDismissedSimilar] = useState(false);
 
   const fileRef = useRef<HTMLInputElement>(null);
+  const simTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // As the description grows, quietly check whether a neighbour already
+  // reported this same problem. 60 meters and similar words means it is
+  // the same broken pipe. Rule-based, instant, works on two bars of network.
+  useEffect(() => {
+    if (phase !== "form") return;
+    const text = description.trim();
+    if (text.length < 20) {
+      setSimilar([]);
+      setDismissedSimilar(false);
+      return;
+    }
+    if (simTimer.current) clearTimeout(simTimer.current);
+    simTimer.current = setTimeout(async () => {
+      setChecking(true);
+      try {
+        const qs = new URLSearchParams({ description: text });
+        if (coords) { qs.set("lat", String(coords.lat)); qs.set("lng", String(coords.lng)); }
+        const res = await fetch(`/api/issues/similar?${qs.toString()}`);
+        const data = await res.json();
+        setSimilar(Array.isArray(data.matches) ? data.matches : []);
+      } catch {
+        // Dedup is a courtesy, never a blocker
+      } finally {
+        setChecking(false);
+      }
+    }, 700);
+    return () => {
+      if (simTimer.current) clearTimeout(simTimer.current);
+    };
+  }, [description, coords, phase]);
+
+  const joinExisting = async () => {
+    const top = similar[0];
+    if (!top) return;
+    setPhase("joining");
+    try {
+      const res = await fetch(`/api/issues/${top.id}/upvote`, { method: "POST" });
+      const d = await res.json();
+      setSimilar((prev) => [
+        { ...top, upvotes: typeof d.upvotes === "number" ? d.upvotes : top.upvotes + 1 },
+        ...prev.slice(1),
+      ]);
+      setPhase("joined");
+      setTimeout(() => {
+        reset();
+        onSubmitted();
+      }, 3200);
+    } catch {
+      setError("Could not add your voice. Try again or post a fresh report.");
+      setPhase("form");
+    }
+  };
 
   const valid = title.trim().length > 5 && description.trim().length > 15 && category !== "";
 
@@ -179,6 +258,8 @@ export function ReportFlow({ onSubmitted }: { onSubmitted: () => void }) {
     setCoords(null);
     setPhoto(null);
     setAnalysis(null);
+    setSimilar([]);
+    setDismissedSimilar(false);
     setPhase("form");
     setError("");
   };
@@ -190,7 +271,7 @@ export function ReportFlow({ onSubmitted }: { onSubmitted: () => void }) {
       {/* ── Form side ── */}
       <div className="p-6 sm:p-8 border-b lg:border-b-0 lg:border-r border-border">
         <AnimatePresence mode="wait">
-          {phase === "done" ? (
+          {phase === "done" || phase === "joined" ? (
             <motion.div
               key="done"
               initial={{ opacity: 0, scale: 0.96 }}
@@ -202,14 +283,28 @@ export function ReportFlow({ onSubmitted }: { onSubmitted: () => void }) {
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 300, damping: 18, delay: 0.1 }}
-                  className="mx-auto grid place-items-center w-20 h-20 rounded-full bg-sky/12 text-sky-deep"
+                  className={`mx-auto grid place-items-center w-20 h-20 rounded-full ${
+                    phase === "joined" ? "bg-primary/10 text-primary" : "bg-sky/12 text-sky-deep"
+                  }`}
                 >
-                  <CheckCircle2 className="w-10 h-10" />
+                  {phase === "joined" ? <MessageSquareHeart className="w-10 h-10" /> : <CheckCircle2 className="w-10 h-10" />}
                 </motion.div>
-                <h3 className="font-display mt-5 text-2xl font-semibold">Asante sana! Report posted.</h3>
-                <p className="mt-2 text-muted-foreground max-w-sm mx-auto">
-                  Your report is now live on the community map for verification. Taking you there…
-                </p>
+                {phase === "joined" ? (
+                  <>
+                    <h3 className="font-display mt-5 text-2xl font-semibold">Sauti yako imehesabika.</h3>
+                    <p className="mt-2 text-muted-foreground max-w-sm mx-auto">
+                      Your voice joined the report that was already there. It now stands at{" "}
+                      <strong className="text-foreground tabular-nums">{similar[0]?.upvotes ?? "?"} neighbours strong</strong>. That is what a work order looks like. Taking you there…
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="font-display mt-5 text-2xl font-semibold">Asante sana! Report posted.</h3>
+                    <p className="mt-2 text-muted-foreground max-w-sm mx-auto">
+                      Your report is now live on the community map for verification. Taking you there…
+                    </p>
+                  </>
+                )}
               </div>
             </motion.div>
           ) : (
@@ -247,7 +342,70 @@ export function ReportFlow({ onSubmitted }: { onSubmitted: () => void }) {
                   className="min-h-24 rounded-[2px] bg-background resize-none"
                   maxLength={1200}
                 />
+                <VoiceReport
+                  onTranscript={(text) =>
+                    setDescription((prev) => (prev ? `${prev.trim()} ${text}`.slice(0, 1200) : text))
+                  }
+                />
               </div>
+
+              {/* You are not the only one. Neighbours beat you to it, and that is good news. */}
+              {phase === "form" && !dismissedSimilar && similar.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="rounded-[2px] bg-card border-l-4 border-primary px-4 py-3.5"
+                >
+                  <div className="flex items-center gap-2">
+                    <Volume2 className="w-4 h-4 text-primary" />
+                    <span className="font-display text-[15px] font-semibold">
+                      You are not the only one.
+                    </span>
+                    {checking && <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />}
+                  </div>
+                  <p className="mt-1 text-[13px] leading-snug text-muted-foreground">
+                    {similar.length === 1
+                      ? "One neighbour already reported this."
+                      : `${similar.length} neighbours already reported this.`}{" "}
+                    {similar[0].upvotes > 1 && `That is ${similar[0].upvotes} voices on one paper instead of ${similar[0].upvotes} papers in a drawer.`}
+                  </p>
+                  <ul className="mt-2 space-y-1">
+                    {similar.slice(0, 3).map((m) => (
+                      <li key={m.id} className="flex items-center gap-2 text-[12.5px] text-muted-foreground">
+                        <span className="cat-dot bg-primary/60 shrink-0" />
+                        <span className="font-medium text-foreground truncate max-w-[46%]">{m.title}</span>
+                        <span>{m.village ?? "Kibera"}</span>
+                        <span className="text-border">·</span>
+                        <span className="tabular-nums">{fmtDistance(m.distanceM)}</span>
+                        <span className="text-border">·</span>
+                        <span>{timeAgo(m.createdAt)}</span>
+                        <span className="ml-auto inline-flex items-center gap-1 font-semibold text-foreground tabular-nums">
+                          <MessageSquareHeart className="w-3 h-3 text-primary" />
+                          {m.upvotes}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="mt-3 flex items-center gap-2 flex-wrap">
+                    <Button
+                      type="button"
+                      onClick={joinExisting}
+                      disabled={phase === "joining"}
+                      className="rounded-[2px] bg-primary hover:bg-terra-deep text-primary-foreground h-10 px-4 text-[13px] font-semibold gap-2"
+                    >
+                      {phase === "joining" ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageSquareHeart className="w-4 h-4" />}
+                      Add my voice to theirs
+                    </Button>
+                    <button
+                      type="button"
+                      onClick={() => setDismissedSimilar(true)}
+                      className="text-[12.5px] font-semibold text-muted-foreground hover:text-foreground underline underline-offset-2"
+                    >
+                      Mine is different, post it anyway
+                    </button>
+                  </div>
+                </motion.div>
+              )}
 
               <div className="space-y-1.5">
                 <Label className="text-[13px] font-semibold">
@@ -345,7 +503,7 @@ export function ReportFlow({ onSubmitted }: { onSubmitted: () => void }) {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="space-y-2.5">
                 <input
                   ref={fileRef}
                   type="file"
@@ -355,27 +513,40 @@ export function ReportFlow({ onSubmitted }: { onSubmitted: () => void }) {
                   onChange={(e) => onPhoto(e.target.files?.[0])}
                   aria-label="Attach a photo"
                 />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => fileRef.current?.click()}
-                  className="rounded-[2px] h-10 gap-2 bg-background border-input font-medium"
-                >
-                  <Camera className="w-4 h-4 text-primary" />
-                  {photo ? "Change photo" : "Attach a photo"}
-                </Button>
-                {photo && (
-                  <div className="relative">
-                    <img src={photo} alt="Attached preview" className="w-12 h-12 rounded-lg object-cover ring-1 ring-border" />
+                <div className="flex items-center gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => fileRef.current?.click()}
+                    className="rounded-[2px] h-10 gap-2 bg-background border-input font-medium"
+                  >
+                    <Camera className="w-4 h-4 text-primary" />
+                    {photo ? "Change photo" : "Attach a photo"}
+                  </Button>
+                  <span className="text-[12px] text-muted-foreground">
+                    One photo is worth forty phone calls.
+                  </span>
+                </div>
+                {photo ? (
+                  <div className="relative overflow-hidden rounded-[2px] ring-1 ring-border">
+                    <img
+                      src={photo}
+                      alt="Attached preview"
+                      className="w-full h-36 object-cover"
+                      style={{ filter: "contrast(1.08) saturate(0.92)" }}
+                    />
+                    <span className="absolute bottom-2 left-2 bg-inkkc/85 text-primary-foreground text-[10px] font-bold uppercase tracking-[0.14em] px-2 py-1 rounded-[2px]">
+                      {coords ? "Pinned and attached" : "Photo attached. Add a pin for the map"}
+                    </span>
                     <button
-                      onClick={() => setPhoto(null)}
-                      className="absolute -top-1.5 -right-1.5 grid place-items-center w-5 h-5 rounded-full bg-inkkc text-primary-foreground"
+                      onClick={() => { setPhoto(null); if (fileRef.current) fileRef.current.value = ""; }}
+                      className="absolute top-2 right-2 grid place-items-center w-8 h-8 rounded-[2px] bg-inkkc/85 text-primary-foreground hover:bg-inkkc"
                       aria-label="Remove photo"
                     >
-                      <X className="w-3 h-3" />
+                      <X className="w-4 h-4" />
                     </button>
                   </div>
-                )}
+                ) : null}
               </div>
 
               {error && (
